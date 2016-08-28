@@ -3,6 +3,8 @@ var gulp = require('gulp'), 
     notify = require("gulp-notify") ,
     uglify = require('gulp-uglify'),
     htmlmin = require('gulp-htmlmin'),
+    packer = require('gulp-packer'),
+    streamify = require('gulp-streamify'),
     cleanCSS = require('gulp-clean-css'),
     closureCompiler = require('gulp-closure-compiler'),
     fs = require('fs'),
@@ -11,8 +13,9 @@ var gulp = require('gulp'), 
     replace = require('gulp-replace');
 
 
+
 // compile sass
-gulp.task('sass', ['script'], function () {
+gulp.task('sass', function () {
     return sass('src/flip-style.scss',{
         compass: true,
         style: 'compressed'
@@ -23,7 +26,7 @@ gulp.task('sass', ['script'], function () {
 });
 
 // closure compiler
-gulp.task('script', function() {
+gulp.task('script', ['sass'], function() {
   return gulp.src('src/flip-script.js')
     .pipe(closureCompiler({
         compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
@@ -38,14 +41,28 @@ gulp.task('script', function() {
     .pipe(gulp.dest('demo'));
 });
 
+gulp.task('injectstyle', ['script'], function() {
+  return gulp.src('demo/flip-script-minified.js')
+    .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
+    .pipe(rename("flip-script-minified-with-inject.js"))
+    .pipe(gulp.dest('demo'));
+});
+
+gulp.task('packscript', ['injectstyle'], function() {
+  return gulp.src('demo/flip-script-minified-with-inject.js')
+    .pipe(streamify(packer({base62: true, shrink: true})))
+    .pipe(rename("flip-script-packed.js"))
+    .pipe(gulp.dest('demo'));
+});
+
 // build the demo
-gulp.task('build', ['sass'], function () {
+gulp.task('build', ['packscript'], function () {
     return gulp.src('src/flip-markup.html')
-        .pipe(replace('%SCRIPT%', fs.readFileSync('demo/flip-script-minified.js', 'utf8')))
-        .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
+        .pipe(replace('%SCRIPT%', fs.readFileSync('demo/flip-script-packed.js', 'utf8')))
         .pipe(htmlmin({
             collapseWhitespace: true,
-            removeTagWhitespace: true
+            removeTagWhitespace: true,
+            removeAttributeQuotes: true
         }))
         .pipe(size({
             title: 'Demo size:',

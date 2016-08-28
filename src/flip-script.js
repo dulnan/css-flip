@@ -12,20 +12,21 @@ var transitionStartingFrom;     // up or down
 var pageCurrent;                // paging counter
 var vh;                         // viewport height
 
-var flip, A, B, C, D;
+var flip, cardA, cardB, cardC, cardD;
 var overlayA, overlayB, overlayC, overlayD;
 
-var classNameFlipUp = 'u';
-var classNameFlipDown = 'd';
-var classNameHasTransition = 't';
-var classNameHasTouch = 'x';
-var up = 'up';
-var down = 'down';
+var classNameFlipUp;
+var classNameFlipDown;
+var classNameHasTransition;
+var classNameHasTouch;
+var up;
+var down;
 
 var M = Math;
+var D = document;
 
 var documentGetElementById = function(id){
-  return document.getElementById(id);
+  return D.getElementById(id);
 }
 
 function handleStart(e) {
@@ -144,24 +145,35 @@ function init() {
     transitioningToNewPage = false;
     pageCurrent = 0;
 
-    body = document.body;
+    classNameFlipUp = 'u';
+    classNameFlipDown = 'd';
+    classNameHasTransition = 't';
+    classNameHasTouch = 'x';
+    up = classNameFlipUp;
+    down = classNameFlipDown;
+
+    body = D.body;
+
+    var node = D.createElement('style');
+    node.innerHTML = "%STYLE%";
+    D.body.appendChild(node);
 
     // get all the elements needed
     flip = documentGetElementById('Z');
-    A = documentGetElementById('A');
-    B = documentGetElementById('B');
-    C = documentGetElementById('C');
-    D = documentGetElementById('D');
+    cardA = documentGetElementById('A');
+    cardB = documentGetElementById('B');
+    cardC = documentGetElementById('C');
+    cardD = documentGetElementById('D');
     overlayA = documentGetElementById('E');
     overlayB = documentGetElementById('F');
     overlayC = documentGetElementById('G');
     overlayD = documentGetElementById('H');
 
 
-    A.style.backgroundPositionY = '-0%';
-    B.style.backgroundPositionY = '-100%';
-    C.style.backgroundPositionY = '-200%';
-    D.style.backgroundPositionY = '-300%';
+    cardA.style.backgroundPositionY = '-0%';
+    cardB.style.backgroundPositionY = '-100%';
+    cardC.style.backgroundPositionY = '-200%';
+    cardD.style.backgroundPositionY = '-300%';
 
 
 
@@ -249,16 +261,16 @@ function handleTouchMove() {
 }
 
 function movePageIndexForward() {
-    A.style.backgroundPositionY = -(((pageCurrent * 2) * 100) +   0) + '%';
-    B.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
-    C.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 200) + '%';
-    D.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 300) + '%';
+    cardA.style.backgroundPositionY = -(((pageCurrent * 2) * 100) +   0) + '%';
+    cardB.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
+    cardC.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 200) + '%';
+    cardD.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 300) + '%';
 }
 
 function movePageIndexBack() {
-    A.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 200) + '%';
-    B.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 100) + '%';
-    C.style.backgroundPositionY = -(((pageCurrent * 2) * 100)      ) + '%';
-    D.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
+    cardA.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 200) + '%';
+    cardB.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 100) + '%';
+    cardC.style.backgroundPositionY = -(((pageCurrent * 2) * 100)      ) + '%';
+    cardD.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
 }
 window['init'] = init;

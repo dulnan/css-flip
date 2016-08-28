@@ -5,6 +5,8 @@
     "gulp-closure-compiler": "^0.3.0",
     "gulp-notify": "^2.2.0",
     "gulp-clean-css": "*",
+    "gulp-packer": "*",
+    "gulp-streamify": "*",
     "gulp-htmlmin": "*",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
