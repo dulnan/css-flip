@@ -1,0 +1,134 @@
+body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    perspective: 200vh;
+}
+
+p {
+    margin: 0;
+}
+
+b {
+    width: 100vw;
+    height: 50vh;
+    box-sizing: border-box;
+    position: absolute;
+    transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background: url(mockpage.png);
+    // background: url(mockpage-numbers.png);
+    background-size: 100%;
+}
+
+// The flip container
+#Z {
+    transform-style: preserve-3d;
+    position: absolute;
+    width: 100vw;
+    height: 50vh;
+    top: 50vh;
+    z-index: 50;
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    .t & {
+        transition: 0.5s all ease-out;
+    }
+    .u & {
+        transform: rotateX(180deg);
+    }
+
+    .d & {
+        transform: rotateX(0deg);
+    }
+}
+
+#A {
+    // background: white;
+    z-index: 10;
+    top: 0;
+}
+
+#B {
+    // background: white;
+    z-index: 40;
+    top: 0;
+}
+
+#C {
+    // background: white;
+    z-index: 30;
+    top: 0;
+    transform: rotateX(180deg);
+}
+
+#D {
+    // background: white;
+    z-index: 20;
+    top: 50vh;
+}
+
+// the overlay
+i {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    .t & {
+        transition: 0.5s all ease-out;
+    }
+}
+
+#E {
+    background: black;
+    z-index: 12;
+    .u & {
+        opacity: 0.75;
+    }
+
+    .d & {
+        opacity: 0;
+    }
+}
+
+#H {
+    background: black;
+    z-index: 22;
+    .u & {
+        opacity: 0;
+    }
+
+    .d & {
+        opacity: 0.75;
+    }
+}
+
+#G {
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+    z-index: 42;
+    .u & {
+        opacity: 0.75;
+    }
+
+    .d & {
+        opacity: 0;
+    }
+}
+
+#F {
+    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+    z-index: 32;
+    .u & {
+        opacity: 0;
+    }
+
+    .d & {
+        opacity: 0.25;
+    }
+}
