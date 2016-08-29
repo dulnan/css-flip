@@ -12,8 +12,9 @@ var transitionStartingFrom;     // up or down
 var pageCurrent;                // paging counter
 var vh;                         // viewport height
 
-var flip, cardA, cardB, cardC, cardD;
-var overlayA, overlayB, overlayC, overlayD;
+var flip;
+var cards = [];
+var overlays = [];
 
 var classNameFlipUp;
 var classNameFlipDown;
@@ -25,11 +26,9 @@ var down;
 var M = Math;
 var D = document;
 
-var documentGetElementById = function(id){
-  return D.getElementById(id);
-}
+var documentGetElementById;
 
-function handleStart(e) {
+var handleStart = function(e) {
     e.preventDefault();
     var touch = e.changedTouches[0];
 
@@ -37,9 +36,9 @@ function handleStart(e) {
     touchStartTime = new Date().getTime();
     touchStartPosY = touch.pageY;
     touchEndPosY = touch.pageY;
-}
+};
 
-function handleMove(e) {
+var handleMove = function(e) {
     e.preventDefault();
 
     touchCurrentPosY = e.changedTouches[0].pageY;
@@ -48,13 +47,9 @@ function handleMove(e) {
     if (isTransitioning == false) {
         handleTouchMove();
     }
-}
+};
 
-function handleCancel(e) {
-    
-}
-
-function handleEnd(e) {
+var handleEnd = function(e) {
     e.preventDefault();
     
     isTransitioning = true;
@@ -72,40 +67,28 @@ function handleEnd(e) {
     flip.style.transform = '';
 
     // remove the opacity set during touchmove
-    overlayA.style.opacity = '0';
-    overlayB.style.opacity = '0';
-    overlayC.style.opacity = '0';
-    overlayD.style.opacity = '0';
+    overlays[0].style.opacity = '0';
+    overlays[1].style.opacity = '0';
+    overlays[2].style.opacity = '0';
+    overlays[3].style.opacity = '0';
 
     // determine wether to finish the flip rotation via animation
     // based on the rotation degree or velocity
     // classes are added to the flip container and overlays
     // that tell the elements how and where to transition to
 
-
+    transitioningToNewPage = true;
+    whereToTransitionTo = up;
     if (touchSpeed > 0.4) {
         whereToTransitionTo = touchDirection;
-        transitioningToNewPage = true;
-    } else if (touchSpeed == 0) {
-        whereToTransitionTo = up;
-        transitioningToNewPage = true;
     } else {
         if (rotation >= 90) {
             if (transitionStartingFrom === up) {
-                whereToTransitionTo = up;
                 transitioningToNewPage = false;
             }
-            if (transitionStartingFrom === down) {
-                whereToTransitionTo = up;
-                transitioningToNewPage = true;
-            }
         } else {
-            if (transitionStartingFrom === up) {
-                whereToTransitionTo = down;
-                transitioningToNewPage = true;
-            }
+            whereToTransitionTo = down;
             if (transitionStartingFrom === down) {
-                whereToTransitionTo = down;
                 transitioningToNewPage = false;
             }
         }
@@ -123,7 +106,7 @@ function handleEnd(e) {
             body.classList.add(classNameFlipDown);
         }
     }
-}
+};
 
 // When the transition of the flipping ends, remove all classes
 // and shift the content offset.
@@ -131,60 +114,50 @@ function handleEnd(e) {
 // The event listener is attached to one page because if we'd
 // attach it to the .flip container, it would be triggered
 // three times, since the two overlays are children of .flip
-function handleTransitionend(e) {
-    // e.preventDefault;
+var handleTransitionend = function(e) {
     restorePagePosition();
-}
+};
 
 
 
-function init() {
+var init = function() {
+    documentGetElementById = function(id){
+      return D.getElementById(id);
+    }
     // set some default values
     vh = window.innerHeight;
     isTransitioning = false;
     transitioningToNewPage = false;
     pageCurrent = 0;
 
-    classNameFlipUp = 'u';
-    classNameFlipDown = 'd';
+    up = classNameFlipUp = 'u';
+    down = classNameFlipDown = 'd';
     classNameHasTransition = 't';
     classNameHasTouch = 'x';
-    up = classNameFlipUp;
-    down = classNameFlipDown;
 
     body = D.body;
 
-    var node = D.createElement('style');
-    node.innerHTML = "%STYLE%";
-    D.body.appendChild(node);
-
     // get all the elements needed
     flip = documentGetElementById('Z');
-    cardA = documentGetElementById('A');
-    cardB = documentGetElementById('B');
-    cardC = documentGetElementById('C');
-    cardD = documentGetElementById('D');
-    overlayA = documentGetElementById('E');
-    overlayB = documentGetElementById('F');
-    overlayC = documentGetElementById('G');
-    overlayD = documentGetElementById('H');
+    cards[0] = documentGetElementById(classNameFlipUp);
+    cards[1] = documentGetElementById(classNameFlipDown);
+    cards[2] = documentGetElementById(classNameHasTransition);
+    cards[3] = documentGetElementById(classNameHasTouch);
+    overlays[0] = documentGetElementById('E');
+    overlays[1] = documentGetElementById('F');
+    overlays[2] = documentGetElementById('G');
+    overlays[3] = documentGetElementById('H');
 
-
-    cardA.style.backgroundPositionY = '-0%';
-    cardB.style.backgroundPositionY = '-100%';
-    cardC.style.backgroundPositionY = '-200%';
-    cardD.style.backgroundPositionY = '-300%';
-
-
+    movePageIndex(0);
 
     body.addEventListener("touchstart", handleStart, false);
     body.addEventListener("touchend", handleEnd, false);
-    body.addEventListener("touchcancel", handleCancel, false);
+    //body.addEventListener("touchcancel", handleCancel, false);
     body.addEventListener("touchmove", handleMove, false);
-    overlayC.addEventListener("transitionend", handleTransitionend, false);
-}
+    overlays[2].addEventListener("transitionend", handleTransitionend, false);
+};
 
-function restorePagePosition() {
+var restorePagePosition = function() {
     body.classList.remove(classNameHasTransition);
     body.classList.remove(classNameFlipUp);
     body.classList.remove(classNameFlipDown);
@@ -194,18 +167,18 @@ function restorePagePosition() {
     if (transitioningToNewPage === true) {
         if (whereToTransitionTo === up) {
             pageCurrent++;
-            movePageIndexForward();
+            movePageIndex(0);
         } else {
-            movePageIndexBack();
+            movePageIndex(2);
             pageCurrent--;
         }
     } else {
-        movePageIndexForward();
+        movePageIndex(0);
     }
     body.classList.add(classNameHasTouch);
-}
+};
 
-function handleTouchMove() {
+var handleTouchMove = function() {
     // calculate how many pixels the user has swiped since
     // the touching started
     touchDistance = touchStartPosY - touchCurrentPosY;
@@ -216,11 +189,11 @@ function handleTouchMove() {
 
     if (touchDistance < 0) {
         rotationOffset = vh + touchDistance;
-        movePageIndexBack();
+        movePageIndex(2);
         transitionStartingFrom = up;
     } else {
         rotationOffset = touchDistance;
-        movePageIndexForward();
+        movePageIndex(0);
         transitionStartingFrom = down;
     }
 
@@ -243,10 +216,10 @@ function handleTouchMove() {
 
     // set opacity values
 
-    overlayA.style.opacity = opacityA;
-    overlayB.style.opacity = opacityB;
-    overlayC.style.opacity = opacityC;
-    overlayD.style.opacity = opacityD;
+    overlays[0].style.opacity = opacityA;
+    overlays[1].style.opacity = opacityB;
+    overlays[2].style.opacity = opacityC;
+    overlays[3].style.opacity = opacityD;
 
     if (M.abs(touchCurrentPosY - touchEndPosY) > 5) {
         if (touchCurrentPosY > touchEndPosY) {
@@ -258,19 +231,15 @@ function handleTouchMove() {
         touchEndTime = new Date().getTime();
         touchEndPosY = touchCurrentPosY;
     }
-}
+};
 
-function movePageIndexForward() {
-    cardA.style.backgroundPositionY = -(((pageCurrent * 2) * 100) +   0) + '%';
-    cardB.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
-    cardC.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 200) + '%';
-    cardD.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 300) + '%';
-}
+var movePageIndex = function(a) {
+    for(i=4;i--;){
+        cards[i].style.backgroundPosition = "0 -" + (200 * pageCurrent + (i - a) * 100) + "%";
+    }
+};
 
-function movePageIndexBack() {
-    cardA.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 200) + '%';
-    cardB.style.backgroundPositionY = -(((pageCurrent * 2) * 100) - 100) + '%';
-    cardC.style.backgroundPositionY = -(((pageCurrent * 2) * 100)      ) + '%';
-    cardD.style.backgroundPositionY = -(((pageCurrent * 2) * 100) + 100) + '%';
-}
+
+
+
 window['init'] = init;

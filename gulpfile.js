@@ -1,26 +1,25 @@
 var gulp = require('gulp'),     
     sass = require('gulp-ruby-sass') ,
-    notify = require("gulp-notify") ,
-    uglify = require('gulp-uglify'),
     htmlmin = require('gulp-htmlmin'),
     packer = require('gulp-packer'),
     streamify = require('gulp-streamify'),
     cleanCSS = require('gulp-clean-css'),
     closureCompiler = require('gulp-closure-compiler'),
     fs = require('fs'),
-    size = require('gulp-size'),
+    gutil = require('gulp-util'),
     rename = require('gulp-rename'),
     replace = require('gulp-replace');
 
-
+var sizeCSS, sizeJSCompiled, sizeJSInjected, sizeJSPacked, sizeTotal;
 
 // compile sass
 gulp.task('sass', function () {
-    return sass('src/flip-style.scss',{
-        compass: true,
-        style: 'compressed'
-    })
-    .pipe(cleanCSS())
+    return sass('src/flip-style.scss')
+    .pipe(cleanCSS({
+        aggressiveMerging: true,
+        advanced: true,
+        semanticMerging: true
+    }))
     .pipe(rename("flip-style-minified.css"))
     .pipe(gulp.dest('demo'));
 });
@@ -43,43 +42,79 @@ gulp.task('script', ['sass'], function() {
 
 gulp.task('injectstyle', ['script'], function() {
   return gulp.src('demo/flip-script-minified.js')
-    .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
+    // .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
     .pipe(rename("flip-script-minified-with-inject.js"))
     .pipe(gulp.dest('demo'));
 });
 
 gulp.task('packscript', ['injectstyle'], function() {
   return gulp.src('demo/flip-script-minified-with-inject.js')
-    .pipe(streamify(packer({base62: true, shrink: true})))
+    // .pipe(streamify(packer({base62: true, shrink: true})))
     .pipe(rename("flip-script-packed.js"))
     .pipe(gulp.dest('demo'));
 });
+
 
 // build the demo
 gulp.task('build', ['packscript'], function () {
     return gulp.src('src/flip-markup.html')
         .pipe(replace('%SCRIPT%', fs.readFileSync('demo/flip-script-packed.js', 'utf8')))
+        .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
         .pipe(htmlmin({
             collapseWhitespace: true,
             removeTagWhitespace: true,
             removeAttributeQuotes: true
         }))
-        .pipe(size({
-            title: 'Demo size:',
-            pretty: false
-        }))
+        .pipe(replace('</style>', ''))
         .pipe(rename("flip.html"))
         .pipe(gulp.dest('demo'));
 });
 
+gulp.task('getfilesize', ['build'], function () {
+
+    fs.stat('demo/flip-style-minified.css', function(err, stat) {
+        sizeCSS = stat.size;
+    });
+
+    fs.stat('demo/flip-script-minified.js', function(err, stat) {
+        sizeJSCompiled = stat.size;
+    });
+
+    fs.stat('demo/flip-script-minified-with-inject.js', function(err, stat) {
+        sizeJSInjected = stat.size;
+    });
+
+    fs.stat('demo/flip-script-packed.js', function(err, stat) {
+        sizeJSPacked = stat.size;
+    });
+
+    fs.stat('demo/flip.html', function(err, stat) {
+        sizeTotal = stat.size;
+    });
+
+});
+
+gulp.task('writelog', ['getfilesize'], function () {
+    
+    // debate me
+    setTimeout(function() {
+        gutil.log('CSS:             ' + sizeCSS + ' b');
+        gutil.log('JS Compiled:    '  + sizeJSCompiled + ' b');
+        gutil.log('JS Injected:    '  + sizeJSInjected + ' b');
+        gutil.log('JS Packed:      '  + sizeJSPacked + ' b');
+        gutil.log('----------------------');
+        gutil.log('Total:          '  + sizeTotal + ' b');
+        gutil.log('----------------------');
+    }, 100);
+});
 
 // watch files
 gulp.task('watch', function() {
-    gulp.watch('src/*.js', ['script', 'build']);
-    gulp.watch('src/*.scss', ['sass', 'build']);
-    gulp.watch('src/*.html', ['build','sass']);
+    gulp.watch('src/*.js',   ['writelog']);
+    gulp.watch('src/*.scss', ['writelog']);
+    gulp.watch('src/*.html', ['writelog']);
 });
 
 
 // Default Task
-gulp.task('default', ['sass', 'script', 'watch', 'build']);
+gulp.task('default', ['sass', 'script', 'watch', 'writelog']);

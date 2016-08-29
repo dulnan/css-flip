@@ -1,39 +1,28 @@
 body {
-    padding: 0;
-    margin: 0;
     overflow: hidden;
-    perspective: 200vh;
-}
-
-p {
-    margin: 0;
-}
-
-b {
+    perspective: 300vh;
+    height: 100vh;
     width: 100vw;
-    height: 50vh;
-    box-sizing: border-box;
-    position: absolute;
+}
+
+* {
+    margin: 0;
     transform-style: preserve-3d;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    background: url(mockpage.png);
-    // background: url(mockpage-numbers.png);
-    background-size: 100%;
+    position: absolute;
+    box-sizing: border-box;
 }
 
 // The flip container
 #Z {
-    transform-style: preserve-3d;
-    position: absolute;
-    width: 100vw;
+    width: 100%;
     height: 50vh;
     top: 50vh;
     z-index: 50;
-    transform-origin: top center;
-    transform: rotateX(0deg);
+    transform-origin: top;
     .t & {
-        transition: 0.5s all ease-out;
+        transition: 0.5s;
     }
     .u & {
         transform: rotateX(180deg);
@@ -44,52 +33,59 @@ b {
     }
 }
 
-#A {
-    // background: white;
-    z-index: 10;
+
+// Cards
+
+b {
+    width: 100%;
+    height: 50vh;
+    background: url(mockpage.png);
+    background-size: 100%;
     top: 0;
 }
 
-#B {
-    // background: white;
-    z-index: 40;
-    top: 0;
+// Card A
+#u {
+
 }
 
-#C {
-    // background: white;
-    z-index: 30;
-    top: 0;
+// Card B
+#d {
+
+}
+
+// Card C
+#t {
     transform: rotateX(180deg);
 }
 
-#D {
-    // background: white;
-    z-index: 20;
+// Card D
+#x {
     top: 50vh;
 }
 
-// the overlay
+//
+// the overlays
+//
+
+// all overlays
 i {
-    position: absolute;
     top: 0;
     width: 100%;
     height: 100%;
     left: 0;
     opacity: 0;
-    transform-style: preserve-3d;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     .t & {
         transition: 0.5s all ease-out;
     }
 }
 
+// Overlay A
 #E {
     background: black;
-    z-index: 12;
+    // z-index: 12;
     .u & {
-        opacity: 0.75;
+        opacity: 0.5;
     }
 
     .d & {
@@ -97,23 +93,25 @@ i {
     }
 }
 
+// Overlay D
 #H {
     background: black;
-    z-index: 22;
+    // z-index: 22;
     .u & {
         opacity: 0;
     }
 
     .d & {
-        opacity: 0.75;
+        opacity: 0.5;
     }
 }
 
+// Overlay C
 #G {
     background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1));
-    z-index: 42;
+    // z-index: 42;
     .u & {
-        opacity: 0.75;
+        opacity: 0.5;
     }
 
     .d & {
@@ -121,14 +119,15 @@ i {
     }
 }
 
+// Overlay B
 #F {
     background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
-    z-index: 32;
+    // z-index: 32;
     .u & {
         opacity: 0;
     }
 
     .d & {
-        opacity: 0.25;
+        opacity: 0.5;
     }
 }
