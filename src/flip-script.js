@@ -107,7 +107,7 @@ var init = function() {
 
         // remove the opacity set during touchmove
         for(i=4;i--;){
-            setOpacity(overlays[i],0);
+            setOpacity(overlays[i],'');
         }
 
         // determine wether to finish the flip rotation via animation

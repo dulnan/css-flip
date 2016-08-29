@@ -2,7 +2,6 @@ body {
     overflow: hidden;
     perspective: 300vh;
     height: 100vh;
-    width: 100vw;
 }
 
 * {
@@ -12,18 +11,15 @@ body {
     backface-visibility: hidden;
     position: absolute;
     box-sizing: border-box;
+    width: 100vw;
 }
 
 // The flip container
 #Z {
-    width: 100%;
     height: 50vh;
     top: 50vh;
     z-index: 50;
     transform-origin: top;
-    .t & {
-        transition: 0.5s;
-    }
     .u & {
         transform: rotateX(180deg);
     }
@@ -37,11 +33,8 @@ body {
 // Cards
 
 b {
-    width: 100%;
     height: 50vh;
-    background: url(mockpage.png);
-    background-size: 100%;
-    top: 0;
+    background: url(mockpage.png) 100%;
 }
 
 // Card A
@@ -70,63 +63,25 @@ b {
 
 // all overlays
 i {
-    top: 0;
-    width: 100%;
     height: 100%;
-    left: 0;
-    .t & {
-        transition: 0.5s all ease-out;
-    }
+    background: black;
+    opacity: 0;
 }
 
-// Overlay A
-#E {
-    background: black;
-    // z-index: 12;
-    .u & {
-        opacity: 0.5;
-    }
-
-    .d & {
-        opacity: 0;
-    }
+.t i, .t #Z {
+    transition: .5s all ease-out
 }
 
-// Overlay D
-#H {
-    background: black;
-    // z-index: 22;
-    .u & {
-        opacity: 0;
-    }
-
-    .d & {
-        opacity: 0.5;
-    }
+.d #H, .u #E {
+    opacity: .5
 }
 
 // Overlay C
 #G {
     background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1));
-    // z-index: 42;
-    .u & {
-        opacity: 0.5;
-    }
-
-    .d & {
-        opacity: 0;
-    }
 }
 
 // Overlay B
 #F {
     background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
-    // z-index: 32;
-    .u & {
-        opacity: 0;
-    }
-
-    .d & {
-        opacity: 0.5;
-    }
 }
