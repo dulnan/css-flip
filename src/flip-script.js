@@ -3,13 +3,13 @@ var touchCurrentTime, touchCurrentPosY;
 var touchEndTime, touchEndPosY;
 var touchSpeed, touchDistance, touchDirection;
 var rotation, rotationOffset;
-var opacityBase, opacityA, opacityB, opacityC, opacityD;
+var opacityBase;
 
-var isTransitioning;            // true when CSS transitions are in progress
-var transitioningToNewPage;     // true when it's transitioning to a new page
+var isTransitioning = false;            // true when CSS transitions are in progress
+var transitioningToNewPage = isTransitioning;
 var whereToTransitionTo;        // up or down
 var transitionStartingFrom;     // up or down
-var pageCurrent;                // paging counter
+var pageCurrent = 0;                // paging counter
 var vh;                         // viewport height
 
 var flip;
@@ -25,117 +25,41 @@ var down;
 
 var M = Math;
 var D = document;
+var body = D.body;
 
 var documentGetElementById;
-
-var handleStart = function(e) {
-    e.preventDefault();
-    var touch = e.changedTouches[0];
-
-    // set the timestamp and position of the first touch
-    touchStartTime = new Date().getTime();
-    touchStartPosY = touch.pageY;
-    touchEndPosY = touch.pageY;
-};
-
-var handleMove = function(e) {
-    e.preventDefault();
-
-    touchCurrentPosY = e.changedTouches[0].pageY;
-
-    // only allow user touch input when no transition is happening
-    if (isTransitioning == false) {
-        handleTouchMove();
-    }
-};
-
-var handleEnd = function(e) {
-    e.preventDefault();
-    
-    isTransitioning = true;
-
-    // Calculate the speed/velocity of the touchgesture
-    // in px per millisecond
-    touchSpeed = M.abs(touchEndPosY - touchStartPosY)/(touchEndTime - touchStartTime) || 0;
-
-    if (touchSpeed == 0) {
-        touchEndPosY = touchStartPosY - 100;
-        handleTouchMove();
-    }
-
-    // remove the rotation set during touchmove
-    flip.style.transform = '';
-
-    // remove the opacity set during touchmove
-    overlays[0].style.opacity = '0';
-    overlays[1].style.opacity = '0';
-    overlays[2].style.opacity = '0';
-    overlays[3].style.opacity = '0';
-
-    // determine wether to finish the flip rotation via animation
-    // based on the rotation degree or velocity
-    // classes are added to the flip container and overlays
-    // that tell the elements how and where to transition to
-
-    transitioningToNewPage = true;
-    whereToTransitionTo = up;
-    if (touchSpeed > 0.4) {
-        whereToTransitionTo = touchDirection;
-    } else {
-        if (rotation >= 90) {
-            if (transitionStartingFrom === up) {
-                transitioningToNewPage = false;
-            }
-        } else {
-            whereToTransitionTo = down;
-            if (transitionStartingFrom === down) {
-                transitioningToNewPage = false;
-            }
-        }
-    }
-
-    if (touchSpeed != 0) {
-        // add this class to the flip container and the overlay
-        // in order to have a smooth transition
-        body.classList.add(classNameHasTransition);
-        body.classList.remove(classNameHasTouch);
-
-        if (whereToTransitionTo === up) {
-            body.classList.add(classNameFlipUp);
-        } else {
-            body.classList.add(classNameFlipDown);
-        }
-    }
-};
-
-// When the transition of the flipping ends, remove all classes
-// and shift the content offset.
-//
-// The event listener is attached to one page because if we'd
-// attach it to the .flip container, it would be triggered
-// three times, since the two overlays are children of .flip
-var handleTransitionend = function(e) {
-    restorePagePosition();
-};
-
-
+var setOpacity;
+var addEventListener;
+var changeClass;
 
 var init = function() {
     documentGetElementById = function(id){
       return D.getElementById(id);
-    }
+    };
+
+    setOpacity = function(element, opacity) {
+        element.style.opacity = opacity;
+    };
+
+    addEventListener = function(element, event, handler) {
+        element.addEventListener(event, handler, false);
+    };
+
+    changeClass = function(classname, add) {
+        if (add == true) {
+            body.classList.add(classname);
+        } else {
+            body.classList.remove(classname);
+        }
+    };
+
     // set some default values
     vh = window.innerHeight;
-    isTransitioning = false;
-    transitioningToNewPage = false;
-    pageCurrent = 0;
 
     up = classNameFlipUp = 'u';
     down = classNameFlipDown = 'd';
     classNameHasTransition = 't';
     classNameHasTouch = 'x';
-
-    body = D.body;
 
     // get all the elements needed
     flip = documentGetElementById('Z');
@@ -150,32 +74,124 @@ var init = function() {
 
     movePageIndex(0);
 
-    body.addEventListener("touchstart", handleStart, false);
-    body.addEventListener("touchend", handleEnd, false);
-    //body.addEventListener("touchcancel", handleCancel, false);
-    body.addEventListener("touchmove", handleMove, false);
-    overlays[2].addEventListener("transitionend", handleTransitionend, false);
-};
+    // Handler for touchstart
+    addEventListener(body, "touchstart", function(e) {
+        e.preventDefault();
+        var touch = e.changedTouches[0];
 
-var restorePagePosition = function() {
-    body.classList.remove(classNameHasTransition);
-    body.classList.remove(classNameFlipUp);
-    body.classList.remove(classNameFlipDown);
-    isTransitioning = false;
+        // set the timestamp and position of the first touch
+        touchStartTime = new Date().getTime();
+        touchStartPosY = touch.pageY;
+        touchEndPosY = touch.pageY;
+    });
 
 
-    if (transitioningToNewPage === true) {
-        if (whereToTransitionTo === up) {
-            pageCurrent++;
-            movePageIndex(0);
-        } else {
-            movePageIndex(2);
-            pageCurrent--;
+
+    // Handler for touchend
+    addEventListener(body, "touchend", function(e) {
+        e.preventDefault();
+    
+        isTransitioning = true;
+
+        // Calculate the speed/velocity of the touchgesture
+        // in px per millisecond
+        touchSpeed = M.abs(touchEndPosY - touchStartPosY)/(touchEndTime - touchStartTime) || 0;
+
+        if (touchSpeed == 0) {
+            touchEndPosY = touchStartPosY - 100;
+            handleTouchMove();
         }
-    } else {
-        movePageIndex(0);
-    }
-    body.classList.add(classNameHasTouch);
+
+        // remove the rotation set during touchmove
+        flip.style.transform = '';
+
+        // remove the opacity set during touchmove
+        for(i=4;i--;){
+            setOpacity(overlays[i],0);
+        }
+
+        // determine wether to finish the flip rotation via animation
+        // based on the rotation degree or velocity
+        // classes are added to the flip container and overlays
+        // that tell the elements how and where to transition to
+
+        transitioningToNewPage = true;
+        whereToTransitionTo = up;
+        if (touchSpeed > 0.4) {
+            whereToTransitionTo = touchDirection;
+        } else {
+            if (rotation >= 90) {
+                if (transitionStartingFrom == up) {
+                    transitioningToNewPage = false;
+                }
+            } else {
+                whereToTransitionTo = down;
+                if (transitionStartingFrom == down) {
+                    transitioningToNewPage = false;
+                }
+            }
+        }
+
+        if (touchSpeed != 0) {
+            // add this class to the flip container and the overlay
+            // in order to have a smooth transition
+            changeClass(classNameHasTransition,true);
+            changeClass(classNameHasTouch,false);
+
+            if (whereToTransitionTo == up) {
+                changeClass(classNameFlipUp,true);
+            } else {
+                changeClass(classNameFlipDown,true);
+            }
+        }
+    });
+
+
+
+    // Handle touchmove
+    addEventListener(body, "touchmove", function(e) {
+        e.preventDefault();
+
+        touchCurrentPosY = e.changedTouches[0].pageY;
+
+        // only allow user touch input when no transition is happening
+        if (isTransitioning == false) {
+            handleTouchMove();
+        }
+    });
+
+
+
+
+
+
+
+    // When the transition of the flipping ends, remove all classes
+    // and shift the content offset.
+    //
+    // The event listener is attached to one page because if we'd
+    // attach it to the .flip container, it would be triggered
+    // three times, since the two overlays are children of .flip
+    addEventListener(overlays[2], "transitionend", function() {
+        changeClass(classNameHasTransition,false);
+        changeClass(classNameFlipUp,false);
+        changeClass(classNameFlipDown,false);
+        isTransitioning = false;
+
+
+        if (transitioningToNewPage == true) {
+            if (whereToTransitionTo == up) {
+                pageCurrent++;
+                movePageIndex(0);
+            } else {
+                movePageIndex(2);
+                pageCurrent--;
+            }
+        } else {
+            movePageIndex(0);
+        }
+        changeClass(classNameHasTouch,true);
+    });
 };
 
 var handleTouchMove = function() {
@@ -199,8 +215,7 @@ var handleTouchMove = function() {
 
     // Calculate the rotation with magic math shit
     // and allow only values between 0 and 180
-    rotation = (((vh - (vh - (rotationOffset))) / vh) * 180);
-    rotation = M.max(M.min(rotation, 180), 0);
+    rotation = M.max(M.min((((vh - (vh - (rotationOffset))) / vh) * 180), 180), 0);
 
     // rotate the flip container based on the calculated rotation
     flip.style.transform = 'rotateX('+ rotation +'deg)';
@@ -209,17 +224,11 @@ var handleTouchMove = function() {
     opacityBase = (((vh - (vh - (rotationOffset))) / vh) * 1);
 
     // calculate the individual opacity values for the overlays
-    opacityA = M.max(M.min((opacityBase - 0.5) * 2, 0.75), 0);
-    opacityD = M.max(M.min((0.5 - opacityBase) * 2, 0.75), 0);
-    opacityB = M.max(M.min((opacityBase * 0.5), 0.25), 0);
-    opacityC = M.max(M.min((0.5 - (opacityBase * 0.5)), 0.25), 0);
-
     // set opacity values
-
-    overlays[0].style.opacity = opacityA;
-    overlays[1].style.opacity = opacityB;
-    overlays[2].style.opacity = opacityC;
-    overlays[3].style.opacity = opacityD;
+    setOpacity(overlays[0],M.max(M.min((opacityBase - 0.5) * 2, 0.75), 0));
+    setOpacity(overlays[1],M.max(M.min((opacityBase * 0.5), 0.25), 0));
+    setOpacity(overlays[2],M.max(M.min((0.5 - (opacityBase * 0.5)), 0.25), 0));
+    setOpacity(overlays[3],M.max(M.min((0.5 - opacityBase) * 2, 0.75), 0));
 
     if (M.abs(touchCurrentPosY - touchEndPosY) > 5) {
         if (touchCurrentPosY > touchEndPosY) {
