@@ -18,7 +18,6 @@ body {
 #Z {
     height: 50vh;
     top: 50vh;
-    z-index: 50;
     transform-origin: top;
     .u & {
         transform: rotateX(180deg);
@@ -69,7 +68,7 @@ i {
 }
 
 .t i, .t #Z {
-    transition: .5s all ease-out
+    transition: .5s
 }
 
 .d #H, .u #E {
@@ -77,11 +76,11 @@ i {
 }
 
 // Overlay C
-#G {
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+#F {
+    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0));
 }
 
 // Overlay B
-#F {
-    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+#G {
+    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.1));
 }

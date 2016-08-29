@@ -60,11 +60,12 @@ gulp.task('build', ['packscript'], function () {
     return gulp.src('src/flip-markup.html')
         .pipe(replace('%SCRIPT%', fs.readFileSync('demo/flip-script-packed.js', 'utf8')))
         .pipe(replace('%STYLE%', fs.readFileSync('demo/flip-style-minified.css', 'utf8')))
-        .pipe(htmlmin({
-            collapseWhitespace: true,
-            removeTagWhitespace: true,
-            removeAttributeQuotes: true
-        }))
+        .pipe(replace('\n', ''))
+        // .pipe(htmlmin({
+        //     collapseWhitespace: true,
+        //     removeTagWhitespace: true,
+        //     removeAttributeQuotes: true
+        // }))
         .pipe(replace('</style>', ''))
         .pipe(rename("flip.html"))
         .pipe(gulp.dest('demo'));
